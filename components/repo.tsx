@@ -86,6 +86,7 @@ export function RepoCard({
       </Group> */}
 
       <Card.Section className={classes.footer}>
+        {/* @ts-ignore */}
         <Text fw={500} size="sm" align="center">
           Become a sponsor for as low as{" "}
           <Text c="red" fw={500}>
