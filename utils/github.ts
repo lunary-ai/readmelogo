@@ -3,8 +3,10 @@ import { Octokit } from "@octokit/core";
 import { useState, useEffect } from "react";
 import { GitHubRepository } from "../types";
 
+console.log(process.env.NEXT_PUBLIC_GITHUB_ACCESS_TOKEN);
+
 export const octokit = new Octokit({
-  // auth: process.env.NEXT_PUBLIC_GITHUB_ACCESS_TOKEN,
+  auth: process.env.NEXT_PUBLIC_GITHUB_ACCESS_TOKEN,
 });
 
 export function useRepository(owner: string, repo: string) {

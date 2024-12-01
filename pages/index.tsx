@@ -3,16 +3,22 @@ import { HeroSection } from "../components/hero";
 import { RepoCard } from "../components/repo";
 
 import csvtojson from "csvtojson";
-import { octokit } from "../utils/github";
+import { Octokit } from "@octokit/core";
 import { GitHubRepository } from "../types";
-import { GetServerSideProps } from "next/types";
 
-export const getServerSideProps = (async () => {
-  const response = await fetch(
-    process.env.NEXT_PUBLIC_GITHUB_ENTRIES_URL as string,
-    { next: { revalidate: 6 * 60 * 60 } }
-  );
+import type { GetServerSideProps } from "next/types";
 
+export const getServerSideProps = (async ({ res }) => {
+  res.setHeader(
+    'Cache-Control',
+    'public, s-maxage=21600, stale-while-revalidate=59'
+  )
+
+  const octokit = new Octokit({
+    auth: process.env.GITHUB_ACCESS_TOKEN,
+  });
+
+  const response = await fetch(process.env.GITHUB_ENTRIES_URL as string);
   const repositories = await Promise.all(
     (
       await csvtojson().fromString(await response.text())
@@ -37,8 +43,6 @@ export const getServerSideProps = (async () => {
 export default function IndexPage({ repositories }: {
   repositories: { repository: GitHubRepository; entry: any }[];
 }) {
-  console.log(repositories);
-
   return (
     <Stack mt={50} justify="center">
       <HeroSection />
@@ -46,7 +50,7 @@ export default function IndexPage({ repositories }: {
       <Container my="md">
         <Grid>
           {repositories.map(({ repository, entry }) => (
-            <Grid.Col span={{ base: 12, md: 6, lg: 4 }}>
+            <Grid.Col key={repository.id} span={{ base: 12, xs: 4 }}>
               <RepoCard repository={repository} entry={entry} />
             </Grid.Col>
           ))}
