@@ -4,30 +4,39 @@ import { RepoCard } from "../components/repo";
 
 import csvtojson from "csvtojson";
 import { octokit } from "../utils/github";
+import { GitHubRepository } from "../types";
+import { GetServerSideProps } from "next/types";
 
-const response = await fetch(
-  process.env.NEXT_PUBLIC_GITHUB_ENTRIES_URL as string,
-  { next: { revalidate: 10 } }
-);
+export const getServerSideProps = (async () => {
+  const response = await fetch(
+    process.env.NEXT_PUBLIC_GITHUB_ENTRIES_URL as string,
+    { next: { revalidate: 6 * 60 * 60 } }
+  );
 
-const repositories = await Promise.all(
-  (
-    await csvtojson().fromString(await response.text())
-  ).map(async (entry) => {
-    const [organization, repoName] = entry.repo.split("/");
-    const { data } = await octokit.request(
-      `GET /repos/${organization}/${repoName}`,
-      {
-        organization,
-        repo: repoName,
-        headers: { "X-GitHub-Api-Version": "2022-11-28" },
-      }
-    );
-    return { repository: data, entry };
-  })
-);
+  const repositories = await Promise.all(
+    (
+      await csvtojson().fromString(await response.text())
+    ).map(async (entry) => {
+      const [organization, repoName] = entry.repo.split("/");
+      const { data } = await octokit.request(
+        `GET /repos/${organization}/${repoName}`,
+        {
+          organization,
+          repo: repoName,
+          headers: { "X-GitHub-Api-Version": "2022-11-28" },
+        }
+      );
+      return { repository: data, entry };
+    })
+  );
+  return { props: { repositories } };
+}) satisfies GetServerSideProps<{
+  repositories: { repository: GitHubRepository; entry: any }[];
+}>;
 
-export default function IndexPage() {
+export default function IndexPage({ repositories }: {
+  repositories: { repository: GitHubRepository; entry: any }[];
+}) {
   console.log(repositories);
 
   return (
