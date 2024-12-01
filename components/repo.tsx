@@ -29,6 +29,26 @@ export function RepoCard({
 
   return (
     <Card withBorder radius="md" p="md" className={classes.card}>
+      <Card.Section className={classes.section}>
+        <Group gap={7} justify="center" align="center">
+          {entry.placement === "both" ? (
+            <>
+              <Badge variant="light" leftSection={""}>
+                website
+              </Badge>
+
+              <Badge variant="light"leftSection={""}>
+                readme
+              </Badge>
+            </>
+          ) : (
+            <Badge variant="light" leftSection={""}>
+              {entry.placement === "repo" ? "readme" : "website"}
+            </Badge>
+          )}
+        </Group>
+      </Card.Section>
+
       <Card.Section>
         <Image
           src={repository.owner.avatar_url}
