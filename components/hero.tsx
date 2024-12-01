@@ -131,34 +131,22 @@ export function HeroSection() {
 
       <div className={classes.inner}>
         <Title className={classes.title}>
-          Automated AI{" "}
+          Sponsor Your Favorite{" "}
           <Text component="span" className={classes.highlight} inherit>
-            code reviews
+            Open Source
           </Text>{" "}
-          for any stack
+          Projects
         </Title>
 
         <Container p={0} size={600}>
           <Text size="lg" c="dimmed" className={classes.description}>
-            Build more reliable software with AI companion. AI is also trained
-            to detect lazy developers who do nothing and just complain on
-            Twitter.
+            Boost your visibility in popular GitHub repos and get your brand or
+            project featured directly in the README of high-impact open source
+            repositories.
+            Connect with engaged developer audiences while
+            supporting the open source community.
           </Text>
         </Container>
-
-        <div className={classes.controls}>
-          <Button
-            className={classes.control}
-            size="lg"
-            variant="default"
-            color="gray"
-          >
-            Book a demo
-          </Button>
-          <Button className={classes.control} size="lg">
-            Purchase a license
-          </Button>
-        </div>
       </div>
     </Container>
   );
