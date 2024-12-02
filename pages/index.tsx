@@ -1,5 +1,13 @@
-import Fuse from 'fuse.js'
-import { Autocomplete, Button, Container, Grid, Group, Stack, TextInput } from "@mantine/core";
+import Fuse from "fuse.js";
+import {
+  Autocomplete,
+  Button,
+  Container,
+  Grid,
+  Group,
+  Stack,
+  TextInput,
+} from "@mantine/core";
 import { HeroSection } from "../components/hero";
 import { RepoCard } from "../components/repo";
 
@@ -8,14 +16,14 @@ import { Octokit } from "@octokit/core";
 import { GitHubRepository } from "../types";
 
 import type { GetServerSideProps } from "next/types";
-import { useState } from 'react';
-import { IconSearch } from '@tabler/icons-react';
+import { useState } from "react";
+import { IconSearch } from "@tabler/icons-react";
 
 export const getServerSideProps = (async ({ res }) => {
   res.setHeader(
-    'Cache-Control',
-    'public, s-maxage=21600, stale-while-revalidate=59'
-  )
+    "Cache-Control",
+    "public, s-maxage=21600, stale-while-revalidate=59"
+  );
 
   const octokit = new Octokit({
     auth: process.env.GITHUB_ACCESS_TOKEN,
@@ -43,21 +51,23 @@ export const getServerSideProps = (async ({ res }) => {
   repositories: { repository: GitHubRepository; entry: any }[];
 }>;
 
-export default function IndexPage({ repositories }: {
+export default function IndexPage({
+  repositories,
+}: {
   repositories: { repository: GitHubRepository; entry: any }[];
 }) {
-  const [query, setQuery] = useState('');
+  const [query, setQuery] = useState("");
   const [filteredResults, setFilteredResults] = useState(repositories);
 
   const fuse = new Fuse(repositories, {
-    keys: ['repository.full_name'],
+    keys: ["repository.full_name", "repository.stargazers_count", "repository.topics", "repository.description"],
     threshold: 0.3,
   });
 
   const handleSearch = (query: string) => {
     setQuery(query);
     if (query) {
-      const results = fuse.search(query).map(result => result.item);
+      const results = fuse.search(query).map((result) => result.item);
       setFilteredResults(results);
     } else {
       setFilteredResults(repositories);
