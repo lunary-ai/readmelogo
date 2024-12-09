@@ -60,7 +60,7 @@ export default function IndexPage({
   const [filteredResults, setFilteredResults] = useState(repositories);
 
   const fuse = new Fuse(repositories, {
-    keys: ["repository.full_name", "repository.stargazers_count", "repository.topics", "repository.description"],
+    keys: ["repository.full_name", "repository.stargazers_count", "repository.topics", "repository.description", "entry.ad_price"],
     threshold: 0.3,
   });
 
