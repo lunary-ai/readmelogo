@@ -31,7 +31,7 @@ import {
   useCombobox,
 } from "@mantine/core";
 import { nFormatter } from "../utils/formatter";
-import classes from "../styles/Sidebar.module.css";
+import classes from "../styles/sidebar.module.css";
 
 import type { Filters, GitHubRepository, SidebarProps } from "../types";
 
