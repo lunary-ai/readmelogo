@@ -146,8 +146,6 @@ export function Sidebar({
 
   const point = <IconPoint size={10} style={{ marginTop: 6 }} stroke={1.5} />;
 
-  const [checked, setChecked] = useState(false);
-
   return (
     <Container
       className={classes.navbar}
@@ -155,7 +153,7 @@ export function Sidebar({
         position: "sticky",
         top: 65,
         zIndex: 10,
-        height: "100vh",
+        height: "95vh",
         maxWidth: "25vw",
         padding: "30px",
       }}

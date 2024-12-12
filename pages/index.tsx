@@ -145,9 +145,9 @@ export default function IndexPage({
           filters={filters}
           setFilters={setFilters}
         />
-        <Container size="md" mb="xl" w="100%">
+        <Container size="md" m="0">
           <Autocomplete
-            style={{ position: "sticky", top: 65, zIndex: 10 }}
+            style={{ position: "sticky", top: 65, zIndex: 10, width: "75vw" }}
             leftSection={<IconSearch size={16} stroke={1.5} />}
             placeholder="Search repositories..."
             size="lg"
@@ -157,7 +157,7 @@ export default function IndexPage({
               setFilters((filters) => ({ ...filters, query }))
             }
           />
-          <Grid w="fit-content" my="md" mx="sm">
+          <Grid w="75vw" my="md" mx="auto">
             {filteredResults.map(({ repository, entry }) => (
               <Grid.Col key={repository.id} span={{ base: 12, lg: 4, md: 6 }}>
                 <RepoCard
