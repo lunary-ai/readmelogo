@@ -4,12 +4,10 @@ import { IconSearch } from "@tabler/icons-react";
 import { Burger, Group } from "@mantine/core";
 import { useDisclosure } from "@mantine/hooks";
 import classes from "../styles/header.module.css";
-import { Sidebar } from "./sidebar";
 
 const links = [
-  { link: "/about", label: "Features" },
-  { link: "/pricing", label: "Pricing" },
-  { link: "/community", label: "Community" },
+  { link: "/about", label: "About" },
+  { link: "https://github.com/7HR4IZ3/github-ad-entries", label: "Github" },
 ];
 
 export function Header() {
@@ -20,7 +18,6 @@ export function Header() {
       key={link.label}
       href={link.link}
       className={classes.link}
-      onClick={(event) => event.preventDefault()}
     >
       {link.label}
     </a>
@@ -30,7 +27,7 @@ export function Header() {
     <header className={classes.header}>
       <div className={classes.inner}>
         <Group>
-          <Burger opened={opened} onClick={toggle} size="sm" hiddenFrom="sm" />
+          {/* <Burger opened={opened} onClick={toggle} size="sm" hiddenFrom="sm" /> */}
           {/* <MantineLogo size={28} /> */}
           REPO SPONSOR
         </Group>
@@ -41,8 +38,6 @@ export function Header() {
           </Group>
         </Group>
       </div>
-
-      {/* <Sidebar /> */}
     </header>
   );
 }

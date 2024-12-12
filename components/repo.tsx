@@ -10,62 +10,78 @@ import {
   RingProgress,
   Text,
 } from "@mantine/core";
+import { nFormatter } from "../utils/formatter";
 import classes from "../styles/repo.module.css";
 
-import type { GitHubRepository } from "../types";
+import type { Filters, GitHubRepository } from "../types";
 
 export function RepoCard({
   repository,
   entry,
+  setFilters,
 }: {
   repository: GitHubRepository;
   entry: any;
+  setFilters: (filters: any) => void;
 }) {
   const topics = repository.topics?.map((badge) => (
-    <Badge variant="light" key={badge} leftSection={""}>
+    <Badge
+      variant="light"
+      key={badge}
+      style={{
+        cursor: "pointer",
+      }}
+      onClick={() =>
+        setFilters((filters: Filters) => ({
+          ...filters,
+          tags: filters.tags.includes(badge)
+            ? filters.tags.filter((v) => v !== badge)
+            : [...filters.tags, badge],
+        }))
+      }
+    >
       {badge}
     </Badge>
   ));
 
   return (
     <Card withBorder radius="md" p="md" className={classes.card}>
-      <Card.Section className={classes.section}>
-        <Group gap={7} justify="center" align="center">
-          {entry.placement === "both" ? (
-            <>
-              <Badge variant="light" leftSection={""}>
-                website
-              </Badge>
-
-              <Badge variant="light"leftSection={""}>
-                readme
-              </Badge>
-            </>
-          ) : (
-            <Badge variant="light" leftSection={""}>
-              {entry.placement === "repo" ? "readme" : "website"}
+      {/* @ts-ignore */}
+      <Card.Section className={classes.section} align="center">
+        <Group>
+        {entry.placement === "both" ? (
+          <>
+            <Badge variant="light">
+              website
             </Badge>
-          )}
+
+            <Badge variant="light">
+              readme
+            </Badge>
+          </>
+        ) : (
+          <Badge variant="light">
+            {entry.placement === "repo" ? "readme" : "website"}
+          </Badge>
+        )}
         </Group>
       </Card.Section>
 
-      <Card.Section>
+      <Card.Section className={classes.section}>
         <Image
+          fit="contain"
           src={repository.owner.avatar_url}
           alt={repository.name}
           height={180}
         />
-      </Card.Section>
-
-      <Card.Section className={classes.section} mt="md">
-        <Group justify="apart">
+        <Group mt="sm">
           <Anchor href={repository.html_url} target="_blank">
             <Text fz="lg" fw={500} variant="gradient">
               {repository.full_name}
             </Text>
           </Anchor>
           <Badge size="sm" variant="light">
-            ⭐️ {repository.stargazers_count}
+            ⭐️ {nFormatter(repository.stargazers_count)}
           </Badge>
         </Group>
         <Text fz="sm" mt="xs" c="dimmed">
@@ -88,22 +104,6 @@ export function RepoCard({
           </Group>
         </Card.Section>
       ) : null}
-
-      {/* <Group justify="space-between" mt="xl">
-        <Text fz="sm" fw={700} className={classes.title}>
-          Running challenge
-        </Text>
-        <Group gap={5}>
-          <Text fz="xs" c="dimmed">
-            80% completed
-          </Text>
-          <RingProgress
-            size={18}
-            thickness={2}
-            sections={[{ value: 80, color: "blue" }]}
-          />
-        </Group>
-      </Group> */}
 
       <Card.Section className={classes.footer}>
         {/* @ts-ignore */}

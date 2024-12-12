@@ -1,3 +1,26 @@
+
+
+export interface Filters {
+  maxPrice: number;
+  minPrice: number;
+  minStars: number;
+  maxStars: number;
+  query: string;
+  tags: string[];
+  placement: {
+    readme: boolean;
+    website: boolean;
+  };
+}
+
+export interface SidebarProps {
+  results: { repository: GitHubRepository; entry: any }[];
+  repositories: { repository: GitHubRepository; entry: any }[];
+  setFilters: (filters: any) => void;
+  filters: Filters;
+}
+
+
 export interface GitHubRepository {
   id: number;
   node_id: string;

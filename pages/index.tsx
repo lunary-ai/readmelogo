@@ -3,6 +3,7 @@ import {
   Autocomplete,
   Button,
   Container,
+  Flex,
   Grid,
   Group,
   Stack,
@@ -16,8 +17,9 @@ import { Octokit } from "@octokit/core";
 import { GitHubRepository } from "../types";
 
 import type { GetServerSideProps } from "next/types";
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { IconSearch } from "@tabler/icons-react";
+import { Sidebar } from "../components/sidebar";
 
 export const getServerSideProps = (async ({ res }) => {
   res.setHeader(
@@ -56,48 +58,118 @@ export default function IndexPage({
 }: {
   repositories: { repository: GitHubRepository; entry: any }[];
 }) {
-  const [query, setQuery] = useState("");
-  const [filteredResults, setFilteredResults] = useState(repositories);
+  const [filters, setFilters] = useState({
+    minStars: 0,
+    maxStars: Infinity,
+    minPrice: 0,
+    maxPrice: Infinity,
+    query: "",
+    tags: [],
+    placement: {
+      readme: true,
+      website: true,
+    },
+  });
 
   const fuse = new Fuse(repositories, {
-    keys: ["repository.full_name", "repository.stargazers_count", "repository.topics", "repository.description"],
+    keys: [
+      "repository.full_name",
+      "repository.topics",
+      "repository.description",
+    ],
     threshold: 0.3,
   });
 
-  const handleSearch = (query: string) => {
-    setQuery(query);
-    if (query) {
-      const results = fuse.search(query).map((result) => result.item);
-      setFilteredResults(results);
-    } else {
-      setFilteredResults(repositories);
+  const filteredResults = useMemo(() => {
+    const { minStars, maxStars, query, tags, minPrice, maxPrice, placement } =
+      filters;
+    let repositoriesToQuery = query
+      ? fuse.search(query).map((result) => result.item)
+      : repositories;
+
+    repositoriesToQuery = repositoriesToQuery.filter(({ entry }) => {
+      if (entry.placement === "both") {
+        return placement.readme || placement.website;
+      }
+
+      if (entry.placement === "readme") {
+        return placement.readme;
+      }
+
+      if (entry.placement === "website") {
+        return placement.website;
+      }
+
+      return false;
+    });
+
+    if (tags?.length > 0) {
+      repositoriesToQuery = repositoriesToQuery.filter(({ repository }) => {
+        return tags.find((tag) => repository.topics.includes(tag));
+      });
     }
-  };
+
+    if (minPrice && maxPrice) {
+      repositoriesToQuery = repositoriesToQuery.filter(({ entry }) => {
+        return entry.ad_price >= minPrice && entry.ad_price <= maxPrice;
+      });
+    }
+
+    if (minStars && maxStars) {
+      repositoriesToQuery = repositoriesToQuery.filter(({ repository }) => {
+        return (
+          repository.stargazers_count >= minStars &&
+          repository.stargazers_count <= maxStars
+        );
+      });
+    }
+
+    return repositoriesToQuery;
+  }, [filters, repositories]);
 
   return (
-    <Stack mt={50} justify="center">
+    <Stack
+      mt={50}
+      justify="center"
+      style={{
+        position: "sticky",
+        top: 0,
+      }}
+    >
       <HeroSection />
 
-      <Container size="md" mb="xl" w="100%">
-        <Autocomplete
-          leftSection={<IconSearch size={16} stroke={1.5} />}
-          placeholder="Search repositories..."
-          size="lg"
-          value={query}
-          data={repositories.map(({ repository }) => repository.full_name)}
-          onChange={(value) => handleSearch(value)}
+      <Flex direction="row">
+        <Sidebar
+          repositories={repositories}
+          results={filteredResults}
+          filters={filters}
+          setFilters={setFilters}
         />
-      </Container>
-
-      <Container my="md">
-        <Grid>
-          {filteredResults.map(({ repository, entry }) => (
-            <Grid.Col key={repository.id} span={{ base: 12, xs: 4 }}>
-              <RepoCard repository={repository} entry={entry} />
-            </Grid.Col>
-          ))}
-        </Grid>
-      </Container>
+        <Container size="md" mb="xl" w="100%">
+          <Autocomplete
+            style={{ position: "sticky", top: 65, zIndex: 10 }}
+            leftSection={<IconSearch size={16} stroke={1.5} />}
+            placeholder="Search repositories..."
+            size="lg"
+            value={filters.query}
+            data={repositories.map(({ repository }) => repository.full_name)}
+            onChange={(query) =>
+              setFilters((filters) => ({ ...filters, query }))
+            }
+          />
+          <Grid w="fit-content" my="md" mx="sm">
+            {filteredResults.map(({ repository, entry }) => (
+              <Grid.Col key={repository.id} span={{ base: 12, lg: 4, md: 6 }}>
+                <RepoCard
+                  repository={repository}
+                  entry={entry}
+                  setFilters={setFilters}
+                />
+              </Grid.Col>
+            ))}
+          </Grid>
+        </Container>
+      </Flex>
     </Stack>
   );
 }
