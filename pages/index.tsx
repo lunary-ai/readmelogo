@@ -17,7 +17,7 @@ import { Octokit } from "@octokit/core";
 import { GitHubRepository } from "../types";
 
 import type { GetServerSideProps } from "next/types";
-import { useMemo, useState } from "react";
+import { useMemo, useState } from "react"
 import { IconSearch } from "@tabler/icons-react";
 import { Sidebar } from "../components/sidebar";
 
@@ -138,16 +138,16 @@ export default function IndexPage({
     >
       <HeroSection />
 
-      <Flex direction="row">
+      <Stack>
         <Sidebar
           repositories={repositories}
           results={filteredResults}
           filters={filters}
           setFilters={setFilters}
         />
-        <Container size="md" m="0">
+        <Group m="lg" justify="center">
           <Autocomplete
-            style={{ position: "sticky", top: 65, zIndex: 10, width: "75vw" }}
+            style={{ position: "sticky", top: 65, zIndex: 10, width: "80%" }}
             leftSection={<IconSearch size={16} stroke={1.5} />}
             placeholder="Search repositories..."
             size="lg"
@@ -157,7 +157,7 @@ export default function IndexPage({
               setFilters((filters) => ({ ...filters, query }))
             }
           />
-          <Grid w="75vw" my="md" mx="auto">
+          <Grid my="md" mx="auto">
             {filteredResults.map(({ repository, entry }) => (
               <Grid.Col key={repository.id} span={{ base: 12, lg: 4, md: 6 }}>
                 <RepoCard
@@ -168,8 +168,8 @@ export default function IndexPage({
               </Grid.Col>
             ))}
           </Grid>
-        </Container>
-      </Flex>
+        </Group>
+      </Stack>
     </Stack>
   );
 }

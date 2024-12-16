@@ -23,6 +23,7 @@ import {
   Pill,
   PillsInput,
   RangeSlider,
+  Slider,
   Stack,
   Text,
   TextInput,
@@ -147,27 +148,18 @@ export function Sidebar({
   const point = <IconPoint size={10} style={{ marginTop: 6 }} stroke={1.5} />;
 
   return (
-    <Container
-      className={classes.navbar}
-      style={{
-        position: "sticky",
-        top: 65,
-        zIndex: 10,
-        height: "95vh",
-        maxWidth: "25vw",
-        padding: "30px",
-      }}
-    >
-      <Group justify="space-between">
-        <Text mb="md">Filters</Text>
+    <Container className={classes.navbar}>
+      <Group justify="space-between" align="center">
+        <Text mb="md" size="lg">Filters</Text>
         <Tooltip label="Reset Filter" withArrow position="right">
           <ActionIcon
             variant="transparent"
-            size={20}
+            size="lg"
             onClick={() =>
               setFilters((filters: Filters) => ({
                 ...filters,
-                query: "", tags: [],
+                query: "",
+                tags: [],
                 minStars: originalMinStars,
                 maxStars: originalMaxStars,
                 minPrice: originalMinPrice,
@@ -176,77 +168,82 @@ export function Sidebar({
               }))
             }
           >
-            <IconRestore size={16} />
+            <IconRestore size="md" />
           </ActionIcon>
         </Tooltip>
       </Group>
 
-      <Group gap="md" className={classes.section}>
-        <Group align="center" justify="center" className={classes.collectionsHeader}>
+      <Flex gap="md" className={classes.section}>
+        <Flex
+          align="center"
+          gap="sm"
+          className={classes.collectionsHeader}
+        >
           <Checkbox
             classNames={{ root: classes.checkbox }}
             label="Readme"
             checked={filters.placement.readme}
-            onChange={(event) => setFilters((filters: Filters) => ({
-              ...filters,
-              placement: {
-                ...filters.placement,
-                readme: event.currentTarget.checked,
-              },
-            }))}
-            wrapperProps={{
-              onClick: () => setFilters((filters: Filters) => ({
+            onChange={(event) =>
+              setFilters((filters: Filters) => ({
                 ...filters,
                 placement: {
                   ...filters.placement,
-                  readme: !filters.placement.readme,
+                  readme: event.currentTarget.checked,
                 },
-              })),
+              }))
+            }
+            wrapperProps={{
+              onClick: () =>
+                setFilters((filters: Filters) => ({
+                  ...filters,
+                  placement: {
+                    ...filters.placement,
+                    readme: !filters.placement.readme,
+                  },
+                })),
             }}
           />
           <Checkbox
             classNames={{ root: classes.checkbox }}
             label="Website"
             checked={filters.placement.website}
-            onChange={(event) => setFilters((filters: Filters) => ({
-              ...filters,
-              placement: {
-                ...filters.placement,
-                website: event.currentTarget.checked,
-              },
-            }))}
-            wrapperProps={{
-              onClick: () => setFilters((filters: Filters) => ({
+            onChange={(event) =>
+              setFilters((filters: Filters) => ({
                 ...filters,
                 placement: {
                   ...filters.placement,
-                  website: !filters.placement.website,
+                  website: event.currentTarget.checked,
                 },
-              })),
+              }))
+            }
+            wrapperProps={{
+              onClick: () =>
+                setFilters((filters: Filters) => ({
+                  ...filters,
+                  placement: {
+                    ...filters.placement,
+                    website: !filters.placement.website,
+                  },
+                })),
             }}
           />
-        </Group>
-      </Group>
+        </Flex>
 
-      <Group gap="md" className={classes.section}>
         <Stack className={classes.collectionsHeader}>
           <Text size="xs" fw={500}>
-            Minimum Price
+            Maximum Price
           </Text>
 
           <Group>
-            <RangeSlider
-              min={originalMinPrice}
+            <Slider
               max={originalMaxPrice}
               w="100%"
-              defaultValue={[minPrice, maxPrice]}
-              value={[filters.minPrice, filters.maxPrice]}
+              defaultValue={maxPrice}
+              value={filters.maxPrice}
               label={(number) => `$${nFormatter(number)}`}
-              onChange={(values) => {
+              onChange={(maxPrice) => {
                 setFilters((filters: Filters) => ({
-                  ...filters,
-                  minPrice: values[0],
-                  maxPrice: values[1],
+                  ...filters, maxPrice,
                 }));
               }}
               thumbChildren={<IconGripVertical size={20} stroke={1.5} />}
@@ -393,7 +390,7 @@ export function Sidebar({
             </Combobox>
           </Group>
         </Stack>
-      </Group>
+      </Flex>
     </Container>
   );
 }
