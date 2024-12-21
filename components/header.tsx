@@ -6,7 +6,7 @@ import classes from "../styles/header.module.css";
 
 const links = [
   { link: "/about", label: "About" },
-  { link: "https://github.com/7HR4IZ3/github-ad-entries", label: "Github" },
+  { link: "https://github.com/lunary-ai/readmelogo", label: "Github" },
 ];
 
 export function Header() {
