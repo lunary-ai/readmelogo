@@ -1,3 +1,10 @@
+
+/**
+ * Formats a number with commas and dots
+ * @param num The number to format
+ * @param digits The number of digits after the decimal point
+ * @returns The formatted number
+ */
 export function nFormatter(num: number, digits: number = 2) {
   const lookup = [
     { value: 1, symbol: "" },

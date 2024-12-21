@@ -1,8 +1,16 @@
 
+/** The props for the dots component */
+export interface DotsProps extends React.ComponentPropsWithoutRef<"svg"> {
+  size?: number;
+  radius?: number;
+}
 
+
+/**
+ * The filters for the sidebar
+ */
 export interface Filters {
   maxPrice: number;
-  minPrice: number;
   minStars: number;
   maxStars: number;
   query: string;
@@ -13,6 +21,9 @@ export interface Filters {
   };
 }
 
+/**
+ * The props for the sidebar
+ */
 export interface SidebarProps {
   results: { repository: GitHubRepository; entry: any }[];
   repositories: { repository: GitHubRepository; entry: any }[];
@@ -20,7 +31,9 @@ export interface SidebarProps {
   filters: Filters;
 }
 
-
+/**
+ * The GitHub repository interface
+ */
 export interface GitHubRepository {
   id: number;
   node_id: string;
@@ -168,4 +181,12 @@ export interface GitHubRepository {
   };
   parent?: GitHubRepository;
   source?: GitHubRepository;
+}
+
+/**
+ * The repository interface
+ */
+export interface Repository {
+  repository: GitHubRepository;
+  entry: any;
 }

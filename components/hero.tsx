@@ -1,10 +1,7 @@
-import { Button, Container, Text, Title } from "@mantine/core";
+import { Container, Text, Title } from "@mantine/core";
 import classes from "../styles/hero.module.css";
 
-interface DotsProps extends React.ComponentPropsWithoutRef<"svg"> {
-  size?: number;
-  radius?: number;
-}
+import type { DotsProps } from "../types";
 
 function Dots({ size = 185, radius = 2.5, ...others }: DotsProps) {
   return (

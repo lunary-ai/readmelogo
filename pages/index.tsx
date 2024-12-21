@@ -1,25 +1,27 @@
 import Fuse from "fuse.js";
-import {
-  Autocomplete,
-  Button,
-  Container,
-  Flex,
-  Grid,
-  Group,
-  Stack,
-  TextInput,
-} from "@mantine/core";
-import { HeroSection } from "../components/hero";
-import { RepoCard } from "../components/repo";
-
-import csvtojson from "csvtojson";
-import { Octokit } from "@octokit/core";
-import { GitHubRepository } from "../types";
-
-import type { GetServerSideProps } from "next/types";
-import { useMemo, useState } from "react"
+import { useMemo, useState } from "react";
 import { IconSearch } from "@tabler/icons-react";
+import { Autocomplete, Grid, Group, Stack } from "@mantine/core";
+
+import { RepoCard } from "../components/repo";
 import { Sidebar } from "../components/sidebar";
+import { HeroSection } from "../components/hero";
+import { fetchRepositories } from "../utils/github";
+
+import type { Repository } from "../types";
+import type { GetServerSideProps } from "next/types";
+
+const INITIAL_FILTER_STATE = {
+  minStars: 0,
+  maxStars: Infinity,
+  maxPrice: Infinity,
+  query: "",
+  tags: [],
+  placement: {
+    readme: true,
+    website: true,
+  },
+};
 
 export const getServerSideProps = (async ({ res }) => {
   res.setHeader(
@@ -27,49 +29,16 @@ export const getServerSideProps = (async ({ res }) => {
     "public, s-maxage=21600, stale-while-revalidate=59"
   );
 
-  const octokit = new Octokit({
-    auth: process.env.GITHUB_ACCESS_TOKEN,
-  });
-
-  const response = await fetch(process.env.GITHUB_ENTRIES_URL as string);
-  const repositories = await Promise.all(
-    (
-      await csvtojson().fromString(await response.text())
-    ).map(async (entry) => {
-      const [organization, repoName] = entry.repo.split("/");
-      const { data } = await octokit.request(
-        `GET /repos/${organization}/${repoName}`,
-        {
-          organization,
-          repo: repoName,
-          headers: { "X-GitHub-Api-Version": "2022-11-28" },
-        }
-      );
-      return { repository: data, entry };
-    })
-  );
+  const repositories = await fetchRepositories();
   return { props: { repositories } };
 }) satisfies GetServerSideProps<{
-  repositories: { repository: GitHubRepository; entry: any }[];
+  repositories: Repository[];
 }>;
 
-export default function IndexPage({
-  repositories,
-}: {
-  repositories: { repository: GitHubRepository; entry: any }[];
+export default function IndexPage({ repositories }: { 
+  repositories: Repository[];
 }) {
-  const [filters, setFilters] = useState({
-    minStars: 0,
-    maxStars: Infinity,
-    minPrice: 0,
-    maxPrice: Infinity,
-    query: "",
-    tags: [],
-    placement: {
-      readme: true,
-      website: true,
-    },
-  });
+  const [filters, setFilters] = useState(INITIAL_FILTER_STATE);
 
   const fuse = new Fuse(repositories, {
     keys: [
@@ -81,26 +50,14 @@ export default function IndexPage({
   });
 
   const filteredResults = useMemo(() => {
-    const { minStars, maxStars, query, tags, minPrice, maxPrice, placement } =
-      filters;
+    const { minStars, maxStars, query, tags, maxPrice, placement } = filters;
     let repositoriesToQuery = query
       ? fuse.search(query).map((result) => result.item)
       : repositories;
 
     repositoriesToQuery = repositoriesToQuery.filter(({ entry }) => {
-      if (entry.placement === "both") {
-        return placement.readme || placement.website;
-      }
-
-      if (entry.placement === "readme") {
-        return placement.readme;
-      }
-
-      if (entry.placement === "website") {
-        return placement.website;
-      }
-
-      return false;
+      if (entry.placement === "both") return placement.readme || placement.website;
+      return placement[entry.placement as "readme" | "website"];
     });
 
     if (tags?.length > 0) {
@@ -109,9 +66,9 @@ export default function IndexPage({
       });
     }
 
-    if (minPrice && maxPrice) {
+    if (maxPrice) {
       repositoriesToQuery = repositoriesToQuery.filter(({ entry }) => {
-        return entry.ad_price >= minPrice && entry.ad_price <= maxPrice;
+        return entry.ad_price <= maxPrice;
       });
     }
 
@@ -140,9 +97,9 @@ export default function IndexPage({
 
       <Stack>
         <Sidebar
+          filters={filters}
           repositories={repositories}
           results={filteredResults}
-          filters={filters}
           setFilters={setFilters}
         />
         <Group m="lg" justify="center">

@@ -1,21 +1,13 @@
-import { use, useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import {
-  IconBulb,
-  IconCheckbox,
   IconGripVertical,
-  IconPlus,
   IconPoint,
   IconRestore,
-  IconSearch,
-  IconUser,
 } from "@tabler/icons-react";
 import {
   ActionIcon,
-  Badge,
-  Box,
   Checkbox,
   CheckIcon,
-  Code,
   Combobox,
   Container,
   Flex,
@@ -26,19 +18,15 @@ import {
   Slider,
   Stack,
   Text,
-  TextInput,
   Tooltip,
-  UnstyledButton,
   useCombobox,
 } from "@mantine/core";
 import { nFormatter } from "../utils/formatter";
 import classes from "../styles/sidebar.module.css";
 
-import type { Filters, GitHubRepository, SidebarProps } from "../types";
+import type { Filters, Repository, SidebarProps } from "../types";
 
-function calculateStars(
-  results: { repository: GitHubRepository; entry: any }[]
-) {
+function calculateStars(results: Repository[]): [number, number] {
   return [
     results.reduce(
       (min, repo) => Math.min(min, repo.repository.stargazers_count),
@@ -51,9 +39,7 @@ function calculateStars(
   ];
 }
 
-function calculatePrice(
-  results: { repository: GitHubRepository; entry: any }[]
-) {
+function calculatePrice(results: Repository[]): [number, number] {
   return [
     results.reduce(
       (min, repo) => Math.min(min, repo.entry.ad_price),
@@ -69,32 +55,36 @@ export function Sidebar({
   filters,
   setFilters,
 }: SidebarProps) {
+
+  // Kept for usage when resetting filters and in the filters section
+  // since it is not updated when the filters are updated
   const [originalMinStars, originalMaxStars] = calculateStars(repositories);
+  const [originalMinPrice, originalMaxPrice] = calculatePrice(repositories);
+
   const [minStars, maxStars] = useMemo(
     () => calculateStars(results),
     [results]
   );
 
-  const [originalMinPrice, originalMaxPrice] = calculatePrice(repositories);
-  const [minPrice, maxPrice] = useMemo(
+  const [, maxPrice] = useMemo(
     () => calculatePrice(results),
     [results]
   );
 
+  // Update the default max price filter from Infinity
   useEffect(() => {
     setFilters((filters: Filters) => ({
       ...filters,
-      minPrice: originalMinPrice,
       maxPrice: originalMaxPrice,
     }));
   }, []);
 
+  // Used for the topic search
+  const [search, setSearch] = useState("");
   const combobox = useCombobox({
     onDropdownClose: () => combobox.resetSelectedOption(),
     onDropdownOpen: () => combobox.updateSelectedOptionIndex("active"),
   });
-
-  const [search, setSearch] = useState("");
 
   const handleValueSelect = (val: string) =>
     setFilters((filters: Filters) => ({
@@ -104,19 +94,20 @@ export function Sidebar({
         : [...filters.tags, val],
     }));
 
-  const handleValueRemove = (val: string) =>
+  const handleValueRemove = (val: string | undefined) =>
     setFilters((filters: Filters) => ({
       ...filters,
       tags: filters.tags.filter((v) => v !== val),
     }));
 
-  const values = filters.tags.map((item) => (
+  const tags = filters.tags.map((item) => (
     <Pill key={item} withRemoveButton onRemove={() => handleValueRemove(item)}>
       {item}
     </Pill>
   ));
 
-  const topicCloud = useMemo(() => {
+  // Array of [topic, count] pairs
+  const topicCloud: Array<[string, number]> = useMemo(() => {
     const topics = repositories.reduce(
       (acc, repo) => [...acc, ...repo.repository.topics],
       [] as string[]
@@ -157,12 +148,9 @@ export function Sidebar({
             size="lg"
             onClick={() =>
               setFilters((filters: Filters) => ({
-                ...filters,
-                query: "",
-                tags: [],
+                ...filters, query: "", tags: [],
                 minStars: originalMinStars,
                 maxStars: originalMaxStars,
-                minPrice: originalMinPrice,
                 maxPrice: originalMaxPrice,
                 placement: { readme: true, website: true },
               }))
@@ -348,13 +336,13 @@ export function Sidebar({
               <Combobox.DropdownTarget>
                 <PillsInput onClick={() => combobox.openDropdown()} w="100%">
                   <Pill.Group>
-                    {values}
+                    {tags}
                     <Combobox.EventsTarget>
                       <PillsInput.Field
-                        onFocus={() => combobox.openDropdown()}
-                        onBlur={() => combobox.closeDropdown()}
                         value={search}
                         placeholder="Search values"
+                        onFocus={() => combobox.openDropdown()}
+                        onBlur={() => combobox.closeDropdown()}
                         onChange={(event) => {
                           combobox.updateSelectedOptionIndex();
                           setSearch(event.currentTarget.value);
@@ -365,9 +353,7 @@ export function Sidebar({
                             search.length === 0
                           ) {
                             event.preventDefault();
-                            handleValueRemove(
-                              filters.tags[filters.tags.length - 1]
-                            );
+                            handleValueRemove(filters.tags.at(-1));
                           }
                         }}
                       />

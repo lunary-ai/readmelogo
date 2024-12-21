@@ -1,7 +1,6 @@
-
 "use client";
-import { IconSearch } from "@tabler/icons-react";
-import { Burger, Group } from "@mantine/core";
+
+import { Group, Text } from "@mantine/core";
 import { useDisclosure } from "@mantine/hooks";
 import classes from "../styles/header.module.css";
 
@@ -26,11 +25,9 @@ export function Header() {
   return (
     <header className={classes.header}>
       <div className={classes.inner}>
-        <Group>
-          {/* <Burger opened={opened} onClick={toggle} size="sm" hiddenFrom="sm" /> */}
-          {/* <MantineLogo size={28} /> */}
+        <Text className={classes.title} onClick={toggle}>
           REPO SPONSOR
-        </Group>
+        </Text>
 
         <Group>
           <Group ml={50} gap={5} className={classes.links} visibleFrom="sm">
